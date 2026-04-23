@@ -28,4 +28,9 @@
     <Library Include="lib\SDL2.lib" />
     <Library Include="lib\SDL2main.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\CPUGraphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
