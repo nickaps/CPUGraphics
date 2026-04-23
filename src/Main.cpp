@@ -1,5 +1,4 @@
 
-#include "SDL/SDL_main.h"
 #include "SDL/SDL.h"
 #include <iostream>
 #include <string.h>
