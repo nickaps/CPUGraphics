@@ -68,8 +68,7 @@ SDL_Window* window;
 
 int main(int argc, char* argv[]) {
 
-	char gameName[] = "Game\0";
-	eRunGame(gameName, 800, 600);
+	eRunGame((char*)"Game\0", 800, 600);
 
 	return 0;
 }
@@ -78,7 +77,7 @@ int main(int argc, char* argv[]) {
 
 int eInitializeWindow() {
 	
-	// 1. Initializing Video
+	// 1. Initializing video & error check
 	if (SDL_Init(SDL_INIT_VIDEO) == 1)
 	{
 		std::cout << ": Could not initialize video [!]\n";
@@ -99,6 +98,7 @@ int eInitializeWindow() {
 								SDL_WINDOW_SHOWN
 	);
 
+	// 2a. Error check for window
 	if (window == NULL) {
 		std::cout << ": Window could not be initialized [!]\n";
 		return 1;
@@ -110,12 +110,15 @@ int eInitializeWindow() {
 }
 
 int eRunGame(char* windowName, int width, int height) {
+
+	// 1. Set game properties
 	properties = GAME_PROPERTIES{
 		windowName,
 		width,
 		height
 	};
 
+	// 2. Run eInitializeWindow method and error check
 	int flag = eInitializeWindow();
 	if (flag == 1) {
 		std::cout << ": Could not start game [!]\n";
@@ -123,15 +126,22 @@ int eRunGame(char* windowName, int width, int height) {
 	else {
 		std::cout << ": Game started successsfully [*]\n";
 	}
-
+	
+	// 3. Start game loops
 	bool quit = false;
 	SDL_Event e;
 
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
+			else eGameStep(&e);
 		}
 	}
 
+	return 0;
+}
+
+int eGameStep(SDL_Event *e) {
+	std::cout << e->type << "\n";
 	return 0;
 }
