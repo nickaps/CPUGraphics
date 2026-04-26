@@ -28,9 +28,9 @@
 #include <string.h>
 
 struct color {
-	uint16_t r;
-	uint16_t g;
-	uint16_t b;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 };
 
 struct float3 {
@@ -81,6 +81,7 @@ struct GAME_PROPERTIES {
 
 GAME_PROPERTIES properties = { (char*)"New Window", 800, 600 };
 SDL_Window* window;
+
 
 
 // Entry Point
