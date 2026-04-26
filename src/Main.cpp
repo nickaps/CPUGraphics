@@ -24,16 +24,21 @@
 #include "SDL/SDL.h"
 #include "CPUGraphics.h"
 #include <iostream>
+#include <vector>
 #include <string.h>
 
-// (x, y, z)
+struct color {
+	uint16_t r;
+	uint16_t g;
+	uint16_t b;
+};
+
 struct float3 {
 	float x;
 	float y;
 	float z;
 };
 
-// (x, y)
 struct float2 {
 
 	float x;
@@ -46,6 +51,20 @@ struct float2 {
 		};
 	}
 
+};
+
+struct vertex {
+	float3 position;
+	color color;
+};
+
+struct v2v {
+	int indeces[];
+};
+
+struct mesh {
+	std::vector<vertex> vertices;
+	std::vector<v2v> edges;
 };
 
 struct GAME_PROPERTIES {
@@ -68,7 +87,7 @@ SDL_Window* window;
 
 int main(int argc, char* argv[]) {
 
-	eRunGame((char*)"Game\0", 800, 600);
+	eRunGame((char*)"New Window\0", 800, 600);
 
 	return 0;
 }
