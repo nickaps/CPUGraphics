@@ -53,18 +53,20 @@ struct float2 {
 
 };
 
+struct triangle {
+	float3 i1;
+	float3 i2;
+	float3 i3;
+};
+
 struct vertex {
 	float3 position;
 	color color;
 };
 
-struct v2v {
-	int indeces[];
-};
-
 struct mesh {
 	std::vector<vertex> vertices;
-	std::vector<v2v> edges;
+	std::vector<triangle> triss;
 };
 
 struct GAME_PROPERTIES {
