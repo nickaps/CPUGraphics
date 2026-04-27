@@ -4,3 +4,7 @@ TODO
 - Double check all structures are necessary (I think they should be good)
 - Implement eImportModel() method
 - Implement gameObject struct
+
+
+
+Update README.md when necessary
