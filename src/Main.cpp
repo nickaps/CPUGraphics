@@ -24,6 +24,7 @@
 #include "SDL/SDL.h"
 #include "CPUGraphics.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string.h>
 
@@ -53,20 +54,21 @@ struct float2 {
 
 };
 
-struct triangle {
-	float3 i1;
-	float3 i2;
-	float3 i3;
+struct vertex {
+	int v;
+	int vt;
+	int vn;
 };
 
-struct vertex {
-	float3 position;
-	color color;
+struct face {
+	std::vector<vertex> vertices;
 };
 
 struct mesh {
-	std::vector<vertex> vertices;
-	std::vector<triangle> triss;
+	std::vector<float3> v_positions;
+	std::vector<float2> v_texture;
+	std::vector<float3> v_normal;
+	std::vector<face> faces;
 };
 
 struct GAME_PROPERTIES {
@@ -94,6 +96,13 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
+
+// Data Methods
+
+mesh eImportObject(char* filepath) {
+	// TODO
+}
+
 
 // Engine Methods
 
