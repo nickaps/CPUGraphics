@@ -25,6 +25,7 @@
 #include "CPUGraphics.h"
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <vector>
 #include <string.h>
 
@@ -80,34 +81,37 @@ struct GAME_PROPERTIES {
 };
 
 
-
 // Globals
 
 GAME_PROPERTIES properties = { (char*)"New Window", 800, 600 };
 SDL_Window* window;
 
 
-
 // Entry Point
 
 int main(int argc, char* argv[]) {
 
-	eRunGame((char*)"New Window\0", 800, 600);
+	Engine engine;
+	engine.eRunGame((char*)"New Window\0", 800, 600);
 
 	return 0;
 }
 
+
 // Data Methods
 
-mesh eImportObject(char* filepath) {
+mesh Engine::eImportObject(char* filepath) {
 	// TODO
+	
+	mesh m;
+	return m;
 }
 
 
 // Engine Methods
 
-int eInitializeWindow() {
-	
+int Engine::eInitializeWindow() {
+
 	// 1. Initializing video & error check
 	if (SDL_Init(SDL_INIT_VIDEO) == 1)
 	{
@@ -121,12 +125,12 @@ int eInitializeWindow() {
 
 	// 2. Creating window
 	window = SDL_CreateWindow(
-								(char*)properties.windowName,
-								SDL_WINDOWPOS_CENTERED,
-								SDL_WINDOWPOS_CENTERED,
-								properties.screenWidth,
-								properties.screenHeight,
-								SDL_WINDOW_SHOWN
+		(char*)properties.windowName,
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		properties.screenWidth,
+		properties.screenHeight,
+		SDL_WINDOW_SHOWN
 	);
 
 	// 2a. Error check for window
@@ -140,7 +144,7 @@ int eInitializeWindow() {
 	}
 }
 
-int eRunGame(char* windowName, int width, int height) {
+int Engine::eRunGame(char* windowName, int width, int height) {
 
 	// 1. Set game properties
 	properties = GAME_PROPERTIES{
@@ -157,7 +161,7 @@ int eRunGame(char* windowName, int width, int height) {
 	else {
 		std::cout << ": Game started successsfully [*]\n";
 	}
-	
+
 	// 3. Start game loops
 	bool quit = false;
 	SDL_Event e;
@@ -172,7 +176,12 @@ int eRunGame(char* windowName, int width, int height) {
 	return 0;
 }
 
-int eGameStep(SDL_Event *e) {
-	std::cout << e->type << "\n";
+int Engine::ePreload() {
+	// TODO
+	return 0;
+}
+
+int Engine::eGameStep(SDL_Event* e) {
+	// std::cout << e->type << "\n";
 	return 0;
 }

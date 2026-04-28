@@ -135,7 +135,9 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="README.md" />
-    <None Include="resources\test.mtl" />
+    <None Include="resources\test.mtl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="SDL2.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -224,7 +226,9 @@
     <ClInclude Include="include\SDL\SDL_vulkan.h" />
   </ItemGroup>
   <ItemGroup>
-    <Object Include="resources\test.obj" />
+    <Object Include="resources\test.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
