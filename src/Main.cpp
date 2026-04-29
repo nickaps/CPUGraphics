@@ -1,6 +1,6 @@
 
 /*
-#####################################################################
+/ / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 
 	CPUGraphics by Nick Chapman
 	Project started on 4/23/2026
@@ -18,7 +18,7 @@
 			eDestroy();
 			...
 
-######################################################################
+/ / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 */
 
 #include "SDL/SDL.h"
@@ -148,11 +148,17 @@ int Engine::eRunGame(char* windowName, int width, int height) {
 }
 
 int Engine::ePreload() {
+	std::cout << ": Executing Preload Methods [*]";
+
 	// TODO
+
 	return 0;
 }
 
 int Engine::eGameStep(SDL_Event* e) {
+	// Update Behavior
+
 	// std::cout << e->type << "\n";
+
 	return 0;
 }
