@@ -34,7 +34,6 @@ struct color {
 	uint8_t g;
 	uint8_t b;
 };
-
 struct float4 {
 	float x;
 	float y;
