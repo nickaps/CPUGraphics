@@ -35,41 +35,20 @@ struct color {
 	uint8_t b;
 };
 
+struct float4 {
+	float x;
+	float y;
+	float z;
+	float w;
+};
 struct float3 {
 	float x;
 	float y;
 	float z;
 };
-
 struct float2 {
-
 	float x;
 	float y;
-
-	// (x, y) -> (x, y, 0)
-	float3 toFloat3() {
-		return float3{
-			this->x, this->y, 0,
-		};
-	}
-
-};
-
-struct vertex {
-	int v;
-	int vt;
-	int vn;
-};
-
-struct face {
-	std::vector<vertex> vertices;
-};
-
-struct mesh {
-	std::vector<float3> v_positions;
-	std::vector<float2> v_texture;
-	std::vector<float3> v_normal;
-	std::vector<face> faces;
 };
 
 struct GAME_PROPERTIES {
@@ -95,16 +74,6 @@ int main(int argc, char* argv[]) {
 	engine.eRunGame((char*)"New Window\0", 800, 600);
 
 	return 0;
-}
-
-
-// Data Methods
-
-mesh Engine::eImportObject(char* filepath) {
-	// TODO
-	
-	mesh m;
-	return m;
 }
 
 
@@ -161,6 +130,9 @@ int Engine::eRunGame(char* windowName, int width, int height) {
 	else {
 		std::cout << ": Game started successsfully [*]\n";
 	}
+
+	// 2.a Run ePreload() before game loop
+	ePreload();
 
 	// 3. Start game loops
 	bool quit = false;

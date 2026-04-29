@@ -7,9 +7,9 @@ struct float3;
 
 class Engine {
 	public:
-		int eInitializeWindow();
-		int ePreload();
-		int eRunGame(char* windowName, int width, int height);
-		int eGameStep(SDL_Event* e);
-		mesh eImportObject(char* filepath);
+		// Virtual Methods
+		virtual int eInitializeWindow();
+		virtual int ePreload();
+		virtual int eRunGame(char* windowName, int width, int height);
+		virtual int eGameStep(SDL_Event* e);
 };
