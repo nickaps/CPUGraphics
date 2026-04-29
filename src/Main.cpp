@@ -156,8 +156,6 @@ int Engine::ePreload() {
 }
 
 int Engine::eGameStep(SDL_Event* e) {
-	// Update Behavior
-
 	// std::cout << e->type << "\n";
 
 	return 0;
