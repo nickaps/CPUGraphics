@@ -1,9 +1,33 @@
 TODO
 
-- Implement eThrowError() method
-- Implement eImportModel() method
-- Implement gameObject struct
+- Projection and a Render loop
+	- eRenderMesh(Mesh mesh)
+	- Design mesh/model system
+	- oRender()
+	- oTranslate(float3 displacement)
+	- oRotate(float4 rotation), oRotate(float3 eulerRotation)
+		-> Learn math about rotating and projecting 3D objects
+	- oActivate(bool a)
 
+- Instancing new objects
 
+- Input manager
+
+- Consider how to import models from wavefront .obj format
+	-> Maybe eImportModel() wouldnt be wise as it would force assets to load as
+	seperate files in /resource/ instead of being compiled together. For example,
+	think about pre-parsing the .obj file with a separate program, and then use this
+	to add meshes to future games.
+
+	-> CPUGraphicsEngine
+		- Contains NO entry point main();
+		- Able contains functionality that can be expanded on with virtual methods etc.
+
+	-> CPUGEMeshTool*
+		- Asks to provide a path to a wavefront .obj file. Then it will parse into a form
+		that we can import straight into our games later. However, now that I consider things,
+		it may be practical to just import the wavefront file as plaintext into future programs?
+		However, I want a very storage/memory efficient way to communicate meshes. Hence the
+		design mesh system above.
 
 Update README.md when necessary

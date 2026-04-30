@@ -156,7 +156,7 @@ int Engine::ePreload() {
 }
 
 int Engine::eGameStep(SDL_Event* e) {
-	// std::cout << e->type << "\n";
+	std::cout << e->type << "\n";
 
 	return 0;
 }
