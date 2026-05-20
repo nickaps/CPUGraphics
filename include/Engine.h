@@ -22,6 +22,10 @@
 / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 */
 
+#ifndef CPUGRAPHICSENG
+#define CPUGRAPHICSENG
+#endif
+
 #include <SDL\SDL.h>
 #include <iostream>
 #include <fstream>
@@ -29,13 +33,6 @@
 #include <vector>
 #include <string.h>
 
-class Engine {
-public:
-	virtual int eInitializeWindow();
-	virtual int eRunGame(char* windowName, int width, int height);
-	virtual int ePreload();
-	virtual int eGameStep(SDL_Event *e);
-};
 
 // Structs
 struct GAME_PROPERTIES {
@@ -44,22 +41,35 @@ struct GAME_PROPERTIES {
 	int screenHeight;
 };
 
-struct float2 {
+typedef struct float2 {
 	float x;
 	float y;
 };
 
-struct float3 {
+typedef struct float3 {
 	float x;
 	float y;
 	float z;
 };
 
-struct float4 {
+typedef struct float4 {
 	float x;
 	float y;
 	float z;
 	float w;
+};
+
+class Engine {
+public:
+
+	// Static methods
+	static float2 eScreenPosition(float x, float y);
+
+	// Virtual methods
+	virtual int eInitializeWindow();
+	virtual int eRunGame(char* windowName, int width, int height);
+	virtual int ePreload();
+	virtual int eGameStep(SDL_Event* e);
 };
 
 
@@ -153,4 +163,10 @@ int Engine::eGameStep(SDL_Event* e) {
 	std::cout << e->type << "\n";
 
 	return 0;
+}
+
+float2 Engine::eScreenPosition(float x, float y) {
+	return float2{
+
+	};
 }
