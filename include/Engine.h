@@ -32,18 +32,18 @@ struct GAME_PROPERTIES {
 	int screenHeight;
 };
 
-typedef struct float2 {
+struct float2 {
 	float x;
 	float y;
 };
 
-typedef struct float3 {
+struct float3 {
 	float x;
 	float y;
 	float z;
 };
 
-typedef struct float4 {
+struct float4 {
 	float x;
 	float y;
 	float z;
