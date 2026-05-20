@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Dev\cppstuff\CPUGraphics\CPUGraphics\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,6 +135,9 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="bin\CPUGraphicsEngine.exe" />
+    <None Include="bin\SDL2.dll" />
+    <None Include="build.bat" />
     <None Include="README.md" />
     <None Include="resources\test.mtl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -145,7 +149,6 @@
     <Library Include="lib\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\CPUGraphics.h" />
     <ClInclude Include="include\SDL\begin_code.h" />
     <ClInclude Include="include\SDL\close_code.h" />
     <ClInclude Include="include\SDL\SDL.h" />
@@ -224,6 +227,7 @@
     <ClInclude Include="include\SDL\SDL_version.h" />
     <ClInclude Include="include\SDL\SDL_video.h" />
     <ClInclude Include="include\SDL\SDL_vulkan.h" />
+    <ClInclude Include="include\Engine.h" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="resources\test.obj">

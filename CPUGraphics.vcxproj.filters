@@ -25,15 +25,17 @@
     <None Include="README.md" />
     <None Include="resources\test.mtl" />
     <None Include="SDL2.dll" />
+    <None Include="bin\CPUGraphicsEngine.exe" />
+    <None Include="bin\SDL2.dll" />
+    <None Include="build.bat">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\SDL2.lib" />
     <Library Include="lib\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\CPUGraphics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\SDL\begin_code.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -266,6 +268,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SDL\SDL_vulkan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -22,12 +22,20 @@
 / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 */
 
-#include "Engine.h"
+#include <SDL\SDL.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <vector>
 #include <string.h>
+
+class Engine {
+public:
+	virtual int eInitializeWindow();
+	virtual int eRunGame(char* windowName, int width, int height);
+	virtual int ePreload();
+	virtual int eGameStep(SDL_Event *e);
+};
 
 // Structs
 struct GAME_PROPERTIES {
