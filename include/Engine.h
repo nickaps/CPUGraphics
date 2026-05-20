@@ -10,15 +10,6 @@
 	uses SDL and is written in C++. The goal is to be able to render
 	any mesh with UV data and textures.
 
-	It will be a convention that methods that I write for the engine
-	that handle behavior (mostly utilizing SDL) will begin with "e..."
-
-	e.g.	eInitializeWindow();
-			eRenderLoop();
-			eInitialize();
-			eDestroy();
-			...
-
 / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 */
 
@@ -62,14 +53,22 @@ typedef struct float4 {
 class Engine {
 public:
 
+	// Screen methods
+	void sDrawPoint(float2 point);
+	void sClearScreen(float3 color);
+
 	// Static methods
 	static float2 eScreenPosition(float x, float y);
+	static float2 eProject(float x, float y, float z);
 
 	// Virtual methods
 	virtual int eInitializeWindow();
 	virtual int eRunGame(char* windowName, int width, int height);
 	virtual int ePreload();
 	virtual int eGameStep(SDL_Event* e);
+
+	virtual int eOnGameStart();
+	virtual int eOnUpdate(SDL_Event* e);
 };
 
 
@@ -78,6 +77,7 @@ public:
 
 GAME_PROPERTIES properties = { (char*)"New Window", 800, 600 };
 SDL_Window* window;
+SDL_Renderer* renderer;
 
 
 // Engine Methods
@@ -112,6 +112,23 @@ int Engine::eInitializeWindow() {
 	}
 	else {
 		std::cout << ": Window Created [*]\n";
+		return 0;
+	}
+
+	// 2. Creating renderer
+	renderer = SDL_CreateRenderer(
+		window,
+		-1,
+		0
+	);
+
+	// 3a. Error check for renderer
+	if (renderer == NULL) {
+		std::cout << ": Renderer could not be initialized [!]\n";
+		return 1;
+	}
+	else {
+		std::cout << ": Renderer Created [*]\n";
 		return 0;
 	}
 }
@@ -151,22 +168,59 @@ int Engine::eRunGame(char* windowName, int width, int height) {
 	return 0;
 }
 
+int Engine::eOnGameStart() {		// Implementation determined by user
+	return 0;
+}
+
+int Engine::eOnUpdate(SDL_Event* e) {			// Implementation determined by user
+
+	return 0;
+}
+
 int Engine::ePreload() {
 	std::cout << ": Executing Preload Methods [*]\n";
 
-	// TODO
+	this->eOnGameStart();
 
 	return 0;
 }
 
 int Engine::eGameStep(SDL_Event* e) {
-	std::cout << e->type << "\n";
+	// Clear the screen
+	this->sClearScreen(float3{ 10,10,60 });
+	// Play update behavior
+	this->eOnUpdate(e);
+	// Present the renderer
+	SDL_RenderPresent(renderer);
 
 	return 0;
 }
 
-float2 Engine::eScreenPosition(float x, float y) {
+float2 Engine::eProject(float x, float y, float z) {
 	return float2{
-
+		x / z,
+		y / z
 	};
 }
+
+float2 Engine::eScreenPosition(float x, float y) {
+	return float2{
+		((x + 1) / 2) * 2,
+		((1 - (y + 1)) / 2) * 2
+	};
+}
+
+
+// Screen Methods
+
+void Engine::sClearScreen(float3 color) {
+	SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
+	SDL_RenderClear(renderer);
+}
+
+void Engine::sDrawPoint(float2 point) {
+	
+	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+	SDL_RenderDrawPoint(renderer, point.x, point.y);
+}
+
