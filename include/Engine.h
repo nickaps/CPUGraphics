@@ -50,12 +50,13 @@ struct float4 {
 	float w;
 };
 
+
 class Engine {
 public:
 
 	// Screen methods
 	void sDrawPoint(float2 point);
-	void sClearScreen(float3 color);
+	void sClearScreen(SDL_Color c);
 
 	// Static methods
 	static float2 eScreenPosition(float x, float y);
@@ -78,21 +79,29 @@ public:
 GAME_PROPERTIES properties = { (char*)"New Window", 800, 600 };
 SDL_Window* window;
 SDL_Renderer* renderer;
+SDL_Texture* texture;
+
+SDL_Color background{
+	10,10,80,255
+};
+SDL_Color foreground{
+	255,200,200,255
+};
 
 
 // Engine Methods
 
 int Engine::eInitializeWindow() {
 
-	// 1. Initializing video & error check
-	if (SDL_Init(SDL_INIT_VIDEO) == 1)
+	// 1. Initializing SDL & error check
+	if (SDL_Init(SDL_INIT_EVERYTHING) == 1)
 	{
-		std::cout << ": Could not initialize video [!]\n";
+		std::cout << ": Could not initialize SDL [!]\n";
 		return 1;
 	}
 	else
 	{
-		std::cout << ": Video Initialized [*]\n";
+		std::cout << ": SDL Initialized [*]\n";
 	}
 
 	// 2. Creating window
@@ -106,24 +115,19 @@ int Engine::eInitializeWindow() {
 	);
 
 	// 2a. Error check for window
-	if (window == NULL) {
+	if (window == nullptr) {
 		std::cout << ": Window could not be initialized [!]\n";
 		return 1;
 	}
 	else {
 		std::cout << ": Window Created [*]\n";
-		return 0;
 	}
 
-	// 2. Creating renderer
-	renderer = SDL_CreateRenderer(
-		window,
-		-1,
-		0
-	);
+	// 3. Creating renderer
+	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
 	// 3a. Error check for renderer
-	if (renderer == NULL) {
+	if (renderer == nullptr) {
 		std::cout << ": Renderer could not be initialized [!]\n";
 		return 1;
 	}
@@ -187,10 +191,10 @@ int Engine::ePreload() {
 
 int Engine::eGameStep(SDL_Event* e) {
 	// Clear the screen
-	this->sClearScreen(float3{ 10,10,60 });
+	this->sClearScreen(background);
 	// Play update behavior
 	this->eOnUpdate(e);
-	// Present the renderer
+	//Present the renderer
 	SDL_RenderPresent(renderer);
 
 	return 0;
@@ -213,14 +217,14 @@ float2 Engine::eScreenPosition(float x, float y) {
 
 // Screen Methods
 
-void Engine::sClearScreen(float3 color) {
-	SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
+void Engine::sClearScreen(SDL_Color c) {
+	SDL_SetRenderDrawColor(renderer, background.r, background.g, background.b, background.a);
 	SDL_RenderClear(renderer);
+	return;
 }
 
 void Engine::sDrawPoint(float2 point) {
-	
-	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+	SDL_SetRenderDrawColor(renderer, foreground.r, foreground.g, foreground.b, foreground.a);
 	SDL_RenderDrawPoint(renderer, point.x, point.y);
 }
 
