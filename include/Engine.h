@@ -66,10 +66,10 @@ public:
 	virtual int eInitializeWindow();
 	virtual int eRunGame(char* windowName, int width, int height);
 	virtual int ePreload();
-	virtual int eGameStep(SDL_Event* e);
+	virtual int eGameStep();
 
 	virtual int eOnGameStart();
-	virtual int eOnUpdate(SDL_Event* e);
+	virtual int eOnUpdate();
 };
 
 
@@ -124,7 +124,7 @@ int Engine::eInitializeWindow() {
 	}
 
 	// 3. Creating renderer
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+	renderer = SDL_CreateRenderer(window, -1, 0);
 
 	// 3a. Error check for renderer
 	if (renderer == nullptr) {
@@ -165,9 +165,11 @@ int Engine::eRunGame(char* windowName, int width, int height) {
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
-			else eGameStep(&e);
 		}
+		eGameStep();
 	}
+
+	SDL_Quit();
 
 	return 0;
 }
@@ -176,8 +178,8 @@ int Engine::eOnGameStart() {		// Implementation determined by user
 	return 0;
 }
 
-int Engine::eOnUpdate(SDL_Event* e) {			// Implementation determined by user
-
+int Engine::eOnUpdate() {			// Implementation determined by user
+	this->sDrawPoint(float2{100, 100});
 	return 0;
 }
 
@@ -189,11 +191,11 @@ int Engine::ePreload() {
 	return 0;
 }
 
-int Engine::eGameStep(SDL_Event* e) {
+int Engine::eGameStep() {
 	// Clear the screen
-	this->sClearScreen(background);
+	sClearScreen(background);
 	// Play update behavior
-	this->eOnUpdate(e);
+	eOnUpdate();
 	//Present the renderer
 	SDL_RenderPresent(renderer);
 
@@ -218,9 +220,8 @@ float2 Engine::eScreenPosition(float x, float y) {
 // Screen Methods
 
 void Engine::sClearScreen(SDL_Color c) {
-	SDL_SetRenderDrawColor(renderer, background.r, background.g, background.b, background.a);
+	SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
 	SDL_RenderClear(renderer);
-	return;
 }
 
 void Engine::sDrawPoint(float2 point) {
