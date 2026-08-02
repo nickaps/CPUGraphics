@@ -26,8 +26,6 @@ Engine::Engine(char* windowName, int screenWidth, int screenHeight) {
 }
 
 Engine::~Engine() {
-
-
 	delete properties;
 	properties = nullptr;
 
@@ -90,7 +88,6 @@ int Engine::eInitializeWindow(char* windowName, int width, int height) {
 }
 
 int Engine::eRunGame() {
-
 
 	// 1 Run ePreload() before game loop
 	ePreload();
