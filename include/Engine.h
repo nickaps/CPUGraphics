@@ -77,8 +77,8 @@ public:
 	int ePreload();
 	int eGameStep();
 
-	int eOnGameStart();
-	int eOnUpdate();
+	virtual int eOnGameStart();
+	virtual int eOnUpdate();
 
 	float2 eScreenPosition(float x, float y);
 	float2 eProject(float x, float y, float z);
