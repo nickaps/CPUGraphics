@@ -3,6 +3,8 @@
 
 // Engine Methods
 
+mesh* testMesh;
+
 Engine::Engine(char* windowName, int screenWidth, int screenHeight) {
 	properties = new GAME_PROPERTIES;
 
@@ -111,12 +113,17 @@ int Engine::eLoadMeshes() {
 	mPyramid->tris.push_back(triangle{ 1, 3, 0 });
 	mPyramid->tris.push_back(triangle{ 3, 1, 2 });
 
+	std::string testpath = "../resources/monkey.obj";
+	
+	testMesh = eParseMesh(testpath);
+
 	return 0;
 }
 
 int Engine::eFreeMeshes() {
 
 	delete this->mPyramid;
+	delete testMesh;
 
 	return 0;
 }
@@ -143,14 +150,17 @@ int Engine::eRunGame() {
 }
 
 int Engine::eOnGameStart() {		// Implementation determined by user
-	this->eTranslateMesh(mPyramid, float3{ 0, -0.5f, 2.0f });
+	this->eTranslateMesh(mPyramid, float3{ 3, -0.5f, 10.0f });
+	this->eTranslateMesh(testMesh, float3{-1.0, 0.0, 3.0f});
 	return 0;
 }
 
 int Engine::eOnUpdate() {			// Implementation determined by user
 	sSetDrawColor(foreground);
 	this->sRenderMesh(*mPyramid);
+	this->sRenderMesh(*testMesh);
 	this->eTranslateMesh(mPyramid, float3{ 0, (sinf(this->time) * 0.001f), 0});
+	this->eTranslateMesh(testMesh, float3{ 0, (sinf(this->time) * 0.001f), 0 });
 
 	return 0;
 }
@@ -240,11 +250,11 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
 	// I'm sure there is a better way to do
 	// this but were gonna roll for now.
 
-	if ( (p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenHeight || p1.x< 0) &&
-		(p2.y > properties->screenHeight || p2.y < 0) || (p2.x > properties->screenHeight || p2.x < 0) &&
-		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenHeight || p3.x < 0)) return;
+	/*if ( (p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenWidth || p1.x< 0) &&
+		(p2.y > properties->screenHeight || p2.y < 0) || (p2.x > properties->screenWidth || p2.x < 0) &&
+		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenWidth || p3.x < 0)) return;*/
 
-	if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
+	/*if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
 	if (p2.y > properties->screenHeight) p2.y = properties->screenHeight + 1;
 	if (p3.y > properties->screenHeight) p3.y = properties->screenHeight + 1;
 
@@ -258,7 +268,7 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
 
 	if (p1.x < 0) p1.x = -1;
 	if (p2.x < 0) p2.x = -1;
-	if (p3.x < 0) p3.x = -1;
+	if (p3.x < 0) p3.x = -1;*/
 
 	this->sDrawLine(p1.x, p1.y, p2.x, p2.y);
 	this->sDrawLine(p2.x, p2.y, p3.x, p3.y);
@@ -315,14 +325,70 @@ void Engine::eTranslateMesh(mesh* m, float3 dsplcmnt)
 	}
 }
 
-mesh* Engine::eParseMesh(char* filePath) {
-	if (filePath == nullptr) return nullptr;
+mesh* Engine::eParseMesh(std::string filePath) {
+	if (filePath == "") return nullptr;
 
 	mesh* m;
-
 	m = new mesh;
 
+	std::string text;
+	std::ifstream file(filePath);
 
+	if (!file.is_open()) {
+		std::cout << ": Could not load mesh " << filePath << " [!]\n";
+		return nullptr;
+	}
+
+	int latestV = 0; int latestF = 0;
+
+	while (getline(file, text)) {
+
+		std::stringstream ss(text);
+		std::string prefix;
+
+		ss >> prefix;
+
+		if (prefix == "v") {
+			std::string xstr;	float x;
+			std::string ystr;	float y;
+			std::string zstr;	float z;
+
+			ss >> xstr;
+			ss >> ystr;
+			ss >> zstr;
+
+			x = std::stof(xstr);
+			y = std::stof(ystr);
+			z = std::stof(zstr);
+
+			m->verts.push_back(float3 {x, y, z});
+		}
+
+		if (prefix == "f") {
+
+			int i = 0;
+			triangle tri;
+
+			std::string tmpstr = text;
+			std::replace(tmpstr.begin(), tmpstr.end(), '/', ' ');
+
+			std::stringstream tokenStream(tmpstr);
+			std::string token;
+
+			tokenStream >> token;
+
+			while (tokenStream >> token) {
+				if (i == 0) tri.v1 = std::stoi(token) - 1;
+				if (i == 3) tri.v2 = std::stoi(token) - 1;
+				if (i == 6) tri.v3 = std::stoi(token) - 1;
+				i++;
+			}
+
+			m->tris.push_back(tri);
+		}
+	}
+
+	file.close();
 
 	return m;
 }

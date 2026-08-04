@@ -20,9 +20,11 @@
 #include "SDL/SDL.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <regex>
 #include <filesystem>
 #include <vector>
-#include <string.h>
 #include <cmath>
 
 // Structs
@@ -88,7 +90,7 @@ public:
 	int ePreload();
 	int eGameStep();
 
-	mesh* eParseMesh(char* filePath);
+	mesh* eParseMesh(std::string filePath);
 	void eTranslateMesh(mesh* m, float3 dsplcmnt);
 
 	virtual int eOnGameStart();
