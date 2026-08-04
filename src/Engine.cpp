@@ -1,14 +1,6 @@
 
 #include "../include/Engine.h"
 
-float3 pos1 = { 0.2f, 0.0f, -0.2f };
-float3 pos2 = { -0.2f, 0.0f, -0.2f };
-float3 pos3 = { -0.2f, 0.1f, 0.2f };
-float3 pos4 = { 0.2f, 0.1f, 0.2f };
-float3 pos5 = { 0.0f, 0.5f, 0.0f };
-
-float speed = 0.001f;
-
 // Engine Methods
 
 Engine::Engine(char* windowName, int screenWidth, int screenHeight) {
@@ -23,9 +15,21 @@ Engine::Engine(char* windowName, int screenWidth, int screenHeight) {
 	else {
 		std::cout << ": Game started successsfully [*]\n";
 	}
+
+	flag = this->eLoadMeshes();
+
+	if (flag == 1) {
+		std::cout << ": Failed to load meshes [!]\n";
+	}
+	else {
+		std::cout << ": Successfully loaded meshes [*]\n";
+	}
 }
 
 Engine::~Engine() {
+
+	eFreeMeshes();
+
 	delete properties;
 	properties = nullptr;
 
@@ -35,7 +39,6 @@ Engine::~Engine() {
 }
 
 int Engine::eInitializeWindow(char* windowName, int width, int height) {
-
 
 	// 1. Set game properties
 	properties->screenHeight = height;
@@ -87,6 +90,37 @@ int Engine::eInitializeWindow(char* windowName, int width, int height) {
 	return 0;
 }
 
+int Engine::eLoadMeshes() {
+	
+	// Default Built-in Pyramid
+	mPyramid = new mesh;
+	mPyramid->verts.reserve(5);
+
+	mPyramid->verts.push_back(float3{ 0.5, -0.5, 0.5 });
+	mPyramid->verts.push_back(float3{ 0.5, -0.5, -0.5 });
+	mPyramid->verts.push_back(float3{ -0.5, -0.5, -0.5 });
+	mPyramid->verts.push_back(float3{ -0.5, -0.5, 0.5 });
+	mPyramid->verts.push_back(float3{ 0, 0.5, 0 });
+
+	mPyramid->tris.reserve(6);
+
+	mPyramid->tris.push_back(triangle{ 0, 4, 3 });
+	mPyramid->tris.push_back(triangle{ 1, 4, 0 });
+	mPyramid->tris.push_back(triangle{ 2, 4, 1 });
+	mPyramid->tris.push_back(triangle{ 3, 4, 2 });
+	mPyramid->tris.push_back(triangle{ 1, 3, 0 });
+	mPyramid->tris.push_back(triangle{ 3, 1, 2 });
+
+	return 0;
+}
+
+int Engine::eFreeMeshes() {
+
+	delete this->mPyramid;
+
+	return 0;
+}
+
 int Engine::eRunGame() {
 
 	// 1 Run ePreload() before game loop
@@ -109,19 +143,15 @@ int Engine::eRunGame() {
 }
 
 int Engine::eOnGameStart() {		// Implementation determined by user
-	mesh.verts.reserve(5);
-	mesh.verts.push_back(pos1);
-	mesh.verts.push_back(pos2);
-	mesh.verts.push_back(pos3);
-	mesh.verts.push_back(pos4);
-	mesh.verts.push_back(pos5);
+
 	return 0;
 }
 
 int Engine::eOnUpdate() {			// Implementation determined by user
-	this->sSetDrawColor(foreground);
-	this->sRenderVertices(mesh);
-	Engine::eTranslateMesh(mesh, float3{0, 0, speed});
+	sSetDrawColor(foreground);
+	this->sRenderMesh(*mPyramid);
+	this->eTranslateMesh(mPyramid, float3{ 0, 0, 0.01f });
+
 	return 0;
 }
 
@@ -145,25 +175,21 @@ int Engine::eGameStep() {
 }
 
 float2 Engine::eProject(float x, float y, float z) {
+	float zpm = z;
+	if (zpm <= 0.01f) {
+		zpm = 0.001f;
+	}
 	return float2{
-		x / z,
-		y / z
+		x / zpm,
+		y / zpm
 	};
 }
 
 float2 Engine::eScreenPosition(float x, float y) {
 	return float2{
-		(x + 1) / 2 * Engine::properties->screenWidth,
-		(y + 1) / 2 * properties->screenHeight
+		(x + 1) / 2 * properties->screenWidth,
+		(1 - y) / 2 * properties->screenHeight
 	};
-}
-void Engine::eTranslateMesh(vertices& v, float3 dsplcmnt) {
-	size_t count = v.verts.size();
-	for (int i = 0; i < count; i++) {
-		v.verts[i].x = v.verts[i].x + dsplcmnt.x;
-		v.verts[i].y = v.verts[i].y + dsplcmnt.y;
-		v.verts[i].z = v.verts[i].z + dsplcmnt.z;
-	}
 }
 
 // Screen Methods
@@ -190,8 +216,8 @@ void Engine::sDrawPoint(float2 point) {
 }
 
 float2 Engine::sProjectPoint(float3 pos) {
-	float2 proj = Engine::eProject(pos.x, pos.y, pos.z);
-	float2 sPos = Engine::eScreenPosition(proj.x, proj.y);
+	float2 proj = eProject(pos.x, pos.y, pos.z);
+	float2 sPos = eScreenPosition(proj.x, proj.y);
 	return sPos;
 }
 
@@ -200,9 +226,69 @@ void Engine::sRenderVertex(float3 pos) {
 	this->sDrawPoint(sPos);
 }
 
-void Engine::sRenderVertices(vertices v) {
-	size_t count = v.verts.size();
+void Engine::sRenderLine(float x1, float y1, float x2, float y2) {
+
+	int flag = SDL_RenderDrawLineF(renderer, x1, y1, x2, y2);
+	return;
+}
+
+void Engine::sRenderMesh(mesh m) {
+
+	size_t count = m.verts.size();
 	for (int i = 0; i < count; i++) {
-		this->sRenderVertex(v.verts[i]);
+		this->sRenderVertex(m.verts[i]);
 	}
+
+	count = m.tris.size();
+
+	int i1; int i2; int i3;
+	float2 p1; float2 p2; float2 p3;
+
+	for (int i = 0; i < count; i++) {
+
+		i1 = m.tris[i].v1;
+		i2 = m.tris[i].v2;
+		i3 = m.tris[i].v3;
+
+		/*printf("%d %d %d", i1, i2, i3);*/
+
+		p1 = sProjectPoint({ m.verts[i1].x, m.verts[i1].y, m.verts[i1].z });
+		p2 = sProjectPoint({ m.verts[i2].x, m.verts[i2].y, m.verts[i2].z });
+		p3 = sProjectPoint({ m.verts[i3].x, m.verts[i3].y, m.verts[i3].z });
+		/*printf("x%f x%f x%f", p1.x, p2.x, p3.x);
+		printf("y%f y%f y%f", p1.y, p2.y, p3.y);*/
+
+		if (m.verts[i1].z <= 0.1f && m.verts[i2].z <= 0.1f && m.verts[i3].z <= 0.1f) return;
+
+		this->sRenderLine(p1.x, p1.y, p2.x, p2.y);
+		this->sRenderLine(p2.x, p2.y, p3.x, p3.y);
+		this->sRenderLine(p3.x, p3.y, p1.x, p1.y);
+
+	}
+
+}
+
+void Engine::eTranslateMesh(mesh* m, float3 dsplcmnt)
+{
+	if (m == nullptr || &m->verts[0] == nullptr) return;
+
+	int count = m->verts.size();
+
+	for (int i = 0; i < count; i++) {
+		m->verts[i].x += dsplcmnt.x;
+		m->verts[i].y += dsplcmnt.y;
+		m->verts[i].z += dsplcmnt.z;
+	}
+}
+
+mesh* Engine::eParseMesh(char* filePath) {
+	if (filePath == nullptr) return nullptr;
+
+	mesh* m;
+
+	m = new mesh;
+
+
+
+	return m;
 }

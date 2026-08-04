@@ -49,10 +49,16 @@ struct float4 {
 	float w;
 };
 
-struct vertices {
-	std::vector<float3> verts;
+struct triangle {
+	int v1;
+	int v2;
+	int v3;
 };
 
+struct mesh {
+	std::vector<float3> verts;
+	std::vector<triangle> tris;
+};
 
 class Engine {
 private:
@@ -60,29 +66,33 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
-	vertices mesh;
+	mesh* mPyramid;
 public:
-
 	// Screen methods
 	void sSetDrawColor(SDL_Color c);
 	void sFillScreen(SDL_Color c);
 	void sDrawPoint(float2 point);
 	void sRenderVertex(float3 pos);
-	void sRenderVertices(vertices v);
+	void sRenderLine(float x1, float y1, float x2, float y2);
+	void sRenderMesh(mesh m);
 	float2 sProjectPoint(float3 pos);
 
 	// Engine Methods
+	int eLoadMeshes();
+	int eFreeMeshes();
 	int eInitializeWindow(char* windowName, int width, int height);
 	int eRunGame();
 	int ePreload();
 	int eGameStep();
+
+	mesh* eParseMesh(char* filePath);
+	void eTranslateMesh(mesh* m, float3 dsplcmnt);
 
 	virtual int eOnGameStart();
 	virtual int eOnUpdate();
 
 	float2 eScreenPosition(float x, float y);
 	float2 eProject(float x, float y, float z);
-	void eTranslateMesh(vertices& v, float3 dsplcmnt);
 
 	SDL_Color background{
 		10,10,80,255
