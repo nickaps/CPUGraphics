@@ -250,11 +250,11 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
 	// I'm sure there is a better way to do
 	// this but were gonna roll for now.
 
-	/*if ( (p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenWidth || p1.x< 0) &&
+	if ( (p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenWidth || p1.x< 0) &&
 		(p2.y > properties->screenHeight || p2.y < 0) || (p2.x > properties->screenWidth || p2.x < 0) &&
-		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenWidth || p3.x < 0)) return;*/
+		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenWidth || p3.x < 0)) return;
 
-	/*if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
+	if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
 	if (p2.y > properties->screenHeight) p2.y = properties->screenHeight + 1;
 	if (p3.y > properties->screenHeight) p3.y = properties->screenHeight + 1;
 
@@ -268,7 +268,7 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
 
 	if (p1.x < 0) p1.x = -1;
 	if (p2.x < 0) p2.x = -1;
-	if (p3.x < 0) p3.x = -1;*/
+	if (p3.x < 0) p3.x = -1;
 
 	this->sDrawLine(p1.x, p1.y, p2.x, p2.y);
 	this->sDrawLine(p2.x, p2.y, p3.x, p3.y);
