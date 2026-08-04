@@ -143,14 +143,14 @@ int Engine::eRunGame() {
 }
 
 int Engine::eOnGameStart() {		// Implementation determined by user
-
+	this->eTranslateMesh(mPyramid, float3{ 0, -0.5f, 2.0f });
 	return 0;
 }
 
 int Engine::eOnUpdate() {			// Implementation determined by user
 	sSetDrawColor(foreground);
 	this->sRenderMesh(*mPyramid);
-	this->eTranslateMesh(mPyramid, float3{ 0, 0, 0.01f });
+	this->eTranslateMesh(mPyramid, float3{ 0, (sinf(this->time) * 0.001f), 0});
 
 	return 0;
 }
@@ -171,14 +171,15 @@ int Engine::eGameStep() {
 	//Present the renderer
 	SDL_RenderPresent(renderer);
 
+	this->time += 0.001f;
+
 	return 0;
 }
 
 float2 Engine::eProject(float x, float y, float z) {
+
 	float zpm = z;
-	if (zpm <= 0.01f) {
-		zpm = 0.001f;
-	}
+	if (z <= 0.001f) zpm = 0.001f;
 	return float2{
 		x / zpm,
 		y / zpm
@@ -226,10 +227,51 @@ void Engine::sRenderVertex(float3 pos) {
 	this->sDrawPoint(sPos);
 }
 
-void Engine::sRenderLine(float x1, float y1, float x2, float y2) {
+void Engine::sDrawLine(float x1, float y1, float x2, float y2) {
 
 	int flag = SDL_RenderDrawLineF(renderer, x1, y1, x2, y2);
 	return;
+}
+
+void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
+
+	// Sutherman-Hodgman Algorithm...
+	// 
+	// I'm sure there is a better way to do
+	// this but were gonna roll for now.
+
+	if ( (p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenHeight || p1.x< 0) &&
+		(p2.y > properties->screenHeight || p2.y < 0) || (p2.x > properties->screenHeight || p2.x < 0) &&
+		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenHeight || p3.x < 0)) return;
+
+	if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
+	if (p2.y > properties->screenHeight) p2.y = properties->screenHeight + 1;
+	if (p3.y > properties->screenHeight) p3.y = properties->screenHeight + 1;
+
+	if (p1.y < 0) p1.y = -1;
+	if (p2.y < 0) p2.y = -1;
+	if (p3.y < 0) p3.y = -1;
+
+	if (p1.x > properties->screenWidth) p1.x = properties->screenWidth + 1;
+	if (p2.x > properties->screenWidth) p2.x = properties->screenWidth + 1;
+	if (p3.x > properties->screenWidth) p3.x = properties->screenWidth + 1;
+
+	if (p1.x < 0) p1.x = -1;
+	if (p2.x < 0) p2.x = -1;
+	if (p3.x < 0) p3.x = -1;
+
+	this->sDrawLine(p1.x, p1.y, p2.x, p2.y);
+	this->sDrawLine(p2.x, p2.y, p3.x, p3.y);
+	this->sDrawLine(p3.x, p3.y, p1.x, p1.y);
+}
+
+void Engine::sRenderTriangle(float3 v1, float3 v2, float3 v3) {
+
+	float2 p1 = sProjectPoint(v1);
+	float2 p2 = sProjectPoint(v2);
+	float2 p3 = sProjectPoint(v3);
+
+	this->sDrawTriangle(p1, p2, p3);
 }
 
 void Engine::sRenderMesh(mesh m) {
@@ -252,18 +294,10 @@ void Engine::sRenderMesh(mesh m) {
 
 		/*printf("%d %d %d", i1, i2, i3);*/
 
-		p1 = sProjectPoint({ m.verts[i1].x, m.verts[i1].y, m.verts[i1].z });
-		p2 = sProjectPoint({ m.verts[i2].x, m.verts[i2].y, m.verts[i2].z });
-		p3 = sProjectPoint({ m.verts[i3].x, m.verts[i3].y, m.verts[i3].z });
 		/*printf("x%f x%f x%f", p1.x, p2.x, p3.x);
 		printf("y%f y%f y%f", p1.y, p2.y, p3.y);*/
 
-		if (m.verts[i1].z <= 0.1f && m.verts[i2].z <= 0.1f && m.verts[i3].z <= 0.1f) return;
-
-		this->sRenderLine(p1.x, p1.y, p2.x, p2.y);
-		this->sRenderLine(p2.x, p2.y, p3.x, p3.y);
-		this->sRenderLine(p3.x, p3.y, p1.x, p1.y);
-
+		this->sRenderTriangle(m.verts[i1], m.verts[i2], m.verts[i3]);
 	}
 
 }

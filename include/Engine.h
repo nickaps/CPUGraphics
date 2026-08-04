@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <vector>
 #include <string.h>
+#include <cmath>
 
 // Structs
 struct GAME_PROPERTIES {
@@ -73,7 +74,9 @@ public:
 	void sFillScreen(SDL_Color c);
 	void sDrawPoint(float2 point);
 	void sRenderVertex(float3 pos);
-	void sRenderLine(float x1, float y1, float x2, float y2);
+	void sDrawLine(float x1, float y1, float x2, float y2);
+	void sDrawTriangle(float2 p1, float2 p2, float2 p3);
+	void sRenderTriangle(float3 v1, float3 v2, float3 v3);
 	void sRenderMesh(mesh m);
 	float2 sProjectPoint(float3 pos);
 
@@ -93,6 +96,8 @@ public:
 
 	float2 eScreenPosition(float x, float y);
 	float2 eProject(float x, float y, float z);
+
+	float time = 0.0f;
 
 	SDL_Color background{
 		10,10,80,255
