@@ -289,13 +289,16 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c) {
 	SDL_Vertex vertices[3];
 
 	vertices[0].color = c;
-	vertices[0].color.b *= 0.5;
+	vertices[0].color.r *= 0.5;
+	vertices[0].color.b *= 0.8;
 	vertices[0].color.g *= 0.5;
 	vertices[0].position = { p1.x, p1.y };
 	vertices[0].tex_coord = { 0.0f, 0.0f };
 
 	vertices[1].color = c;
-	vertices[1].color.b *= 0.8;
+	vertices[0].color.r *= 0.9;
+	vertices[0].color.b *= 0.8;
+	vertices[0].color.g *= 0.9;
 	vertices[1].position = { p2.x, p2.y };
 	vertices[1].tex_coord = { 0.0f, 0.0f };
 
