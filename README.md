@@ -14,3 +14,9 @@
 			eInitialize();
 			eDestroy();
 			...
+			
+If you are trying to launch from an IDE like Visual Studio, it's possible
+that your IDE is opening from a path different that where the binary
+lives. This will cause your meshes to not load and then for your
+instance to crash. Try using the build.bat file or launching the .exe in
+the binary folder.

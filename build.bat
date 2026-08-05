@@ -11,5 +11,6 @@ if "%~1" NEQ "" (
 echo "Building source file into local directory ./bin/%BUILDFILENAME%.exe..."
 g++ -I./include ./src/Main.cpp ./src/Engine.cpp -L./lib -lSDL2main -lSDL2 -o ./bin/%BUILDFILENAME%.exe
 echo "Build completed."
-"./bin/%BUILDFILENAME%.exe"
+cd "./bin"
+"%BUILDFILENAME%.exe"
 pause

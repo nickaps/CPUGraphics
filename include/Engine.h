@@ -99,6 +99,9 @@ public:
 	float2 eScreenPosition(float x, float y);
 	float2 eProject(float x, float y, float z);
 
+	std::vector<std::string> pathsToMeshes;
+	std::vector<mesh*> loadedMeshes;
+
 	float time = 0.0f;
 
 	SDL_Color background{

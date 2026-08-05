@@ -3,8 +3,6 @@
 
 // Engine Methods
 
-mesh* testMesh;
-
 Engine::Engine(char* windowName, int screenWidth, int screenHeight) {
 	properties = new GAME_PROPERTIES;
 
@@ -16,15 +14,6 @@ Engine::Engine(char* windowName, int screenWidth, int screenHeight) {
 	}
 	else {
 		std::cout << ": Game started successsfully [*]\n";
-	}
-
-	flag = this->eLoadMeshes();
-
-	if (flag == 1) {
-		std::cout << ": Failed to load meshes [!]\n";
-	}
-	else {
-		std::cout << ": Successfully loaded meshes [*]\n";
 	}
 }
 
@@ -113,9 +102,12 @@ int Engine::eLoadMeshes() {
 	mPyramid->tris.push_back(triangle{ 1, 3, 0 });
 	mPyramid->tris.push_back(triangle{ 3, 1, 2 });
 
-	std::string testpath = "../resources/monkey.obj";
-	
-	testMesh = eParseMesh(testpath);
+	// Find all Paths to a new .obj file and add them to the loadedMeshes vectors
+	for (int i = 0; i < this->pathsToMeshes.size(); i++) {
+		mesh* m;
+		m = this->eParseMesh(this->pathsToMeshes[i]);
+		this->loadedMeshes.push_back(m);
+	}
 
 	return 0;
 }
@@ -123,7 +115,10 @@ int Engine::eLoadMeshes() {
 int Engine::eFreeMeshes() {
 
 	delete this->mPyramid;
-	delete testMesh;
+	
+	for (int i = 0; i < loadedMeshes.size(); i++) {
+		delete loadedMeshes[i];
+	}
 
 	return 0;
 }
@@ -150,23 +145,45 @@ int Engine::eRunGame() {
 }
 
 int Engine::eOnGameStart() {		// Implementation determined by user
-	this->eTranslateMesh(mPyramid, float3{ 3, -0.5f, 10.0f });
-	this->eTranslateMesh(testMesh, float3{-1.0, 0.0, 3.0f});
+	this->eTranslateMesh(mPyramid, float3{ 0, -2.0f, 10.0f });
+	this->eTranslateMesh(loadedMeshes[0], float3{ 5.0, -2.0f, 10.0f});
+	this->eTranslateMesh(loadedMeshes[1], float3{ 3.0, -2.0f, 10.0f });
+	this->eTranslateMesh(loadedMeshes[2], float3{ -3.0, -2.0f, 10.0f });
+	this->eTranslateMesh(loadedMeshes[3], float3{ -5.0, -2.0f, 10.0f });
 	return 0;
 }
 
 int Engine::eOnUpdate() {			// Implementation determined by user
 	sSetDrawColor(foreground);
+
+	// Renders
 	this->sRenderMesh(*mPyramid);
-	this->sRenderMesh(*testMesh);
+	this->sRenderMesh(*loadedMeshes[0]);
+	this->sRenderMesh(*loadedMeshes[1]);
+	this->sRenderMesh(*loadedMeshes[2]);
+	this->sRenderMesh(*loadedMeshes[3]);
+
+	// Translates
 	this->eTranslateMesh(mPyramid, float3{ 0, (sinf(this->time) * 0.001f), 0});
-	this->eTranslateMesh(testMesh, float3{ 0, (sinf(this->time) * 0.001f), 0 });
+	this->eTranslateMesh(loadedMeshes[0], float3{ 0, (cosf(this->time) * 0.001f), 0 });
+	this->eTranslateMesh(loadedMeshes[1], float3{ 0, (sinf(this->time) * 0.001f), 0 });
+	this->eTranslateMesh(loadedMeshes[2], float3{ 0, (cosf(this->time) * 0.001f), 0 });
+	this->eTranslateMesh(loadedMeshes[3], float3{ 0, (sinf(this->time) * 0.001f), 0 });
 
 	return 0;
 }
 
 int Engine::ePreload() {
 	std::cout << ": Executing Preload Methods [*]\n";
+
+	int flag = this->eLoadMeshes();;
+
+	if (flag == 1) {
+		std::cout << ": Failed to load meshes [!]\n";
+	}
+	else {
+		std::cout << ": Successfully loaded meshes [*]\n";
+	}
 
 	this->eOnGameStart();
 
@@ -176,9 +193,9 @@ int Engine::ePreload() {
 int Engine::eGameStep() {
 	// Clear the screen
 	sFillScreen(background);
-	// Play update behavior
+	// Call update behavior
 	eOnUpdate();
-	//Present the renderer
+	// Present the renderer
 	SDL_RenderPresent(renderer);
 
 	this->time += 0.001f;
