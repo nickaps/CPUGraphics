@@ -7,8 +7,7 @@ int main(int argc, char* argv[]) {
 
 	{
 
-
-		Engine engine((char*)"New Window\0", 360, 360);
+		Engine engine((char*)"New Window\0", 1000, 900);
 
 		engine.pathsToMeshes.push_back("../resources/test.obj");
 		engine.pathsToMeshes.push_back("../resources/house.obj");

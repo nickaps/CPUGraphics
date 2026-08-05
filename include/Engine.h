@@ -23,6 +23,8 @@
 #include <sstream>
 #include <string>
 #include <regex>
+#include <algorithm>
+#include <functional>
 #include <filesystem>
 #include <vector>
 #include <cmath>
@@ -77,9 +79,12 @@ public:
 	void sDrawPoint(float2 point);
 	void sRenderVertex(float3 pos);
 	void sDrawLine(float x1, float y1, float x2, float y2);
-	void sDrawTriangle(float2 p1, float2 p2, float2 p3);
-	void sRenderTriangle(float3 v1, float3 v2, float3 v3);
-	void sRenderMesh(mesh m);
+	void sDrawWireTriangle(float2 p1, float2 p2, float2 p3);
+	void sRenderWireTriangle(float3 v1, float3 v2, float3 v3);
+	void sRenderWireframeMesh(mesh m);
+	void sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c);
+	void sRenderTriangle(float3 v1, float3 v2, float3 v3, SDL_Color c);
+	void sRenderMesh(mesh m, SDL_Color c);
 	float2 sProjectPoint(float3 pos);
 
 	// Engine Methods
@@ -109,6 +114,16 @@ public:
 	};
 	SDL_Color foreground{
 		255,200,200,255
+	};
+
+	SDL_Color red{
+		255,30,30,255
+	};
+	SDL_Color green{
+		30,255,30,255
+	};
+	SDL_Color blue{
+		30,30,255,255
 	};
 
 	Engine(char* windowName, int screenWidth, int screenHeight);

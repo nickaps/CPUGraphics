@@ -157,11 +157,11 @@ int Engine::eOnUpdate() {			// Implementation determined by user
 	sSetDrawColor(foreground);
 
 	// Renders
-	this->sRenderMesh(*mPyramid);
-	this->sRenderMesh(*loadedMeshes[0]);
-	this->sRenderMesh(*loadedMeshes[1]);
-	this->sRenderMesh(*loadedMeshes[2]);
-	this->sRenderMesh(*loadedMeshes[3]);
+	this->sRenderMesh(*mPyramid, red);
+	this->sRenderMesh(*loadedMeshes[0], green);
+	this->sRenderMesh(*loadedMeshes[1], blue);
+	this->sRenderMesh(*loadedMeshes[2], red);
+	this->sRenderMesh(*loadedMeshes[3], foreground);
 
 	// Translates
 	this->eTranslateMesh(mPyramid, float3{ 0, (sinf(this->time) * 0.001f), 0});
@@ -260,7 +260,84 @@ void Engine::sDrawLine(float x1, float y1, float x2, float y2) {
 	return;
 }
 
-void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
+void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c) {
+	// Sutherman-Hodgman Algorithm...
+	// 
+	// I'm sure there is a better way to do
+	// this but were gonna roll for now.
+
+	if ((p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenWidth || p1.x < 0) &&
+		(p2.y > properties->screenHeight || p2.y < 0) || (p2.x > properties->screenWidth || p2.x < 0) &&
+		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenWidth || p3.x < 0)) return;
+
+	if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
+	if (p2.y > properties->screenHeight) p2.y = properties->screenHeight + 1;
+	if (p3.y > properties->screenHeight) p3.y = properties->screenHeight + 1;
+
+	if (p1.y < 0) p1.y = -1;
+	if (p2.y < 0) p2.y = -1;
+	if (p3.y < 0) p3.y = -1;
+
+	if (p1.x > properties->screenWidth) p1.x = properties->screenWidth + 1;
+	if (p2.x > properties->screenWidth) p2.x = properties->screenWidth + 1;
+	if (p3.x > properties->screenWidth) p3.x = properties->screenWidth + 1;
+
+	if (p1.x < 0) p1.x = -1;
+	if (p2.x < 0) p2.x = -1;
+	if (p3.x < 0) p3.x = -1;
+
+	SDL_Vertex vertices[3];
+
+	vertices[0].color = c;
+	vertices[0].color.b *= 0.5;
+	vertices[0].color.g *= 0.5;
+	vertices[0].position = { p1.x, p1.y };
+	vertices[0].tex_coord = { 0.0f, 0.0f };
+
+	vertices[1].color = c;
+	vertices[1].color.b *= 0.8;
+	vertices[1].position = { p2.x, p2.y };
+	vertices[1].tex_coord = { 0.0f, 0.0f };
+
+	vertices[2].color = c;
+	vertices[2].position = { p3.x, p3.y };
+	vertices[2].tex_coord = { 0.0f, 0.0f };
+
+	SDL_RenderGeometry(renderer, NULL, vertices, 3, NULL, 0);
+}
+
+void Engine::sRenderTriangle(float3 v1, float3 v2, float3 v3, SDL_Color c) {
+	float2 p1 = sProjectPoint(v1);
+	float2 p2 = sProjectPoint(v2);
+	float2 p3 = sProjectPoint(v3);
+
+	this->sDrawTriangle(p1, p2, p3, c);
+}
+
+void Engine::sRenderMesh(mesh m, SDL_Color c) {
+
+	std::vector<triangle> triangles = m.tris;
+
+	int count = triangles.size();
+
+	int i1; int i2; int i3;
+	float2 p1; float2 p2; float2 p3;
+
+	std::vector<triangle> tris_cpy = triangles;
+	std::sort(tris_cpy.begin(), tris_cpy.end(), [m](const auto& a, const auto& b) {
+		return ((m.verts[a.v1].z + m.verts[a.v2].z + m.verts[a.v3].z) / 3) > ((m.verts[b.v1].z + m.verts[b.v2].z + m.verts[b.v3].z) / 3);
+		});
+
+	for (int i = 0; i < count; i++) {
+		i1 = tris_cpy[i].v1;
+		i2 = tris_cpy[i].v2;
+		i3 = tris_cpy[i].v3;
+
+		this->sRenderTriangle(m.verts[i1], m.verts[i2], m.verts[i3], c);
+	}
+}
+
+void Engine::sDrawWireTriangle(float2 p1, float2 p2, float2 p3) {
 
 	// Sutherman-Hodgman Algorithm...
 	// 
@@ -292,16 +369,16 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3) {
 	this->sDrawLine(p3.x, p3.y, p1.x, p1.y);
 }
 
-void Engine::sRenderTriangle(float3 v1, float3 v2, float3 v3) {
+void Engine::sRenderWireTriangle(float3 v1, float3 v2, float3 v3) {
 
 	float2 p1 = sProjectPoint(v1);
 	float2 p2 = sProjectPoint(v2);
 	float2 p3 = sProjectPoint(v3);
 
-	this->sDrawTriangle(p1, p2, p3);
+	this->sDrawWireTriangle(p1, p2, p3);
 }
 
-void Engine::sRenderMesh(mesh m) {
+void Engine::sRenderWireframeMesh(mesh m) {
 
 	size_t count = m.verts.size();
 	for (int i = 0; i < count; i++) {
@@ -324,7 +401,7 @@ void Engine::sRenderMesh(mesh m) {
 		/*printf("x%f x%f x%f", p1.x, p2.x, p3.x);
 		printf("y%f y%f y%f", p1.y, p2.y, p3.y);*/
 
-		this->sRenderTriangle(m.verts[i1], m.verts[i2], m.verts[i3]);
+		this->sRenderWireTriangle(m.verts[i1], m.verts[i2], m.verts[i3]);
 	}
 
 }
@@ -407,5 +484,6 @@ mesh* Engine::eParseMesh(std::string filePath) {
 
 	file.close();
 
+	std::cout << ": Successfully loaded mesh " << filePath << " [*]\n";
 	return m;
 }
