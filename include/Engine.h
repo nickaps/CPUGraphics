@@ -30,6 +30,8 @@
 #include <cmath>
 #include <numeric>
 
+#define PI 3.14159265359f
+
 using std::iota;
 
 // Structs
@@ -103,6 +105,7 @@ public:
 	float3 eFindMeanVertex(std::vector<float3> *vertices);
 	float eFindBrightnessFromFog(float3 point);
 	void eMoveCamera(float3 dsplcmnt);
+	void eRotateCameraY(float theta);
 
 	mesh* eParseMesh(std::string filePath);
 	void eTranslateMesh(mesh* m, float3 dsplcmnt);
@@ -119,6 +122,8 @@ public:
 	std::vector<SDL_Color> colorsToRender;
 
 	float3 cameraPosition = { 0.0f, 0.0f, 0.0f };
+	float2 cameraRotationMatrix = { 0.0f, 1.0f };
+	float cameraTheta = 0.0f;
 
 	int fogStart = 2.0f;
 	int fogEnd = 50.0f;

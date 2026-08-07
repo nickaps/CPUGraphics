@@ -27,6 +27,8 @@ Engine::~Engine() {
 	window = nullptr;
 	renderer = nullptr;
 	texture = nullptr;
+
+	std::cout << ": Successfully shutdown Engine [*]\n\n";
 }
 
 int Engine::eInitializeWindow(char* windowName, int width, int height) {
@@ -138,16 +140,16 @@ int Engine::eRunGame() {
 			if (e.type == SDL_KEYDOWN) {
 				switch (e.key.keysym.sym) {
 				case SDLK_w:
-					eMoveCamera(float3{ 0.0f, 0.0f, 0.5f });
+					eMoveCamera(float3{cameraRotationMatrix.x * 0.5f, 0, cameraRotationMatrix.y * 0.5f});
 					break;
 				case SDLK_s:
-					eMoveCamera(float3{ 0.0f, 0.0f, -0.5f });
+					eMoveCamera(float3{ cameraRotationMatrix.x * -0.5f, 0, cameraRotationMatrix.y * -0.5f });
 					break;
 				case SDLK_a:
-					eMoveCamera(float3{ -0.5f, 0.0f, 0.0f });
+					eRotateCameraY(-15);
 					break;
 				case SDLK_d:
-					eMoveCamera(float3{ 0.5f, 0.0f, 0.0f });
+					eRotateCameraY(15);
 					break;
 				}
 			}
@@ -161,21 +163,34 @@ int Engine::eRunGame() {
 }
 
 int Engine::eOnGameStart() {		// Implementation determined by user
-	this->eTranslateMesh(mPyramid, float3{ 0, -2.0f, 15.0f });
-	this->eTranslateMesh(loadedMeshes[0], float3{ 3.0, -2.0f, 20.0f});
-	this->eTranslateMesh(loadedMeshes[1], float3{ 3.0, -2.0f, 10.0f });
-	this->eTranslateMesh(loadedMeshes[2], float3{ -3.0, -0.8f, 6.0f });
-	this->eTranslateMesh(loadedMeshes[3], float3{ -5.0, -2.0f, 10.0f });
+	meshesToRender.push_back(loadedMeshes[0]);
+	meshesToRender.push_back(loadedMeshes[1]);
+	meshesToRender.push_back(loadedMeshes[2]); 
+	meshesToRender.push_back(loadedMeshes[3]);
+	meshesToRender.push_back(loadedMeshes[5]);
+	meshesToRender.push_back(loadedMeshes[6]);
+	meshesToRender.push_back(loadedMeshes[7]);
+
+	this->eTranslateMesh(loadedMeshes[0], float3{ 10.0, 0.0f, 20.0f});
+	this->eTranslateMesh(loadedMeshes[1], float3{ 6.0, 0.0f, 10.0f });
+	this->eTranslateMesh(loadedMeshes[2], float3{ -7.0, 0.0f, 6.0f });
+	this->eTranslateMesh(loadedMeshes[3], float3{ -10.0, 0.0f, 10.0f });
+	this->eTranslateMesh(loadedMeshes[4], float3{ -2.0f, 0.6f, 4.0f });
+	this->eTranslateMesh(loadedMeshes[6], float3{ -8.0f, -1.0f, 4.0f });
+	this->eTranslateMesh(loadedMeshes[7], float3{ -2.0f, -1.0f, -4.0f });
 	return 0;
 }
 
 int Engine::eOnUpdate() {			// Implementation determined by user
-	sSetDrawColor(foreground);
+	if (cameraPosition.x > 11.0f) cameraPosition.x = 11.0f;
+	if (cameraPosition.x < -11.0f) cameraPosition.x = -11.0f;
+	if (cameraPosition.z > 11.0f) cameraPosition.z = 11.0f;
+	if (cameraPosition.z < -11.0f) cameraPosition.z = -11.0f;
 
 	// Renders
-	this->sRenderMesh(*mPyramid, red);
-	this->sRenderMeshes(loadedMeshes, this->colorsToRender);
-
+	this->sRenderMesh(*loadedMeshes[4], green);
+	this->sRenderMeshes(meshesToRender, this->colorsToRender);
+		
 	// Translates
 
 	return 0;
@@ -213,11 +228,21 @@ int Engine::eGameStep() {
 
 float2 Engine::eProject(float x, float y, float z) {
 
-	float zpm = z - cameraPosition.z;
-	if (z <= 0.001f) zpm = 0.001f;
+	float dx = x - cameraPosition.x;
+	float dy = y - cameraPosition.y;
+	float dz = z - cameraPosition.z;
+
+	float cosT = cosf((cameraTheta * PI) / 180.0f);
+	float sinT = sinf((cameraTheta * PI) / 180.0f);
+
+	float x_p = dx * cosT - dz * sinT;
+	float z_p = dx * sinT + dz * cosT;
+
+	if (z_p <= 0.01f) z_p = 0.01f;
+
 	return float2{
-		(x - cameraPosition.x) / zpm,
-		(y - cameraPosition.y)  / zpm
+		x_p / z_p,
+		dy / z_p
 	};
 }
 
@@ -268,6 +293,18 @@ void Engine::eMoveCamera(float3 dsplcmnt) {
 	this->cameraPosition.z += dsplcmnt.z;
 }
 
+void Engine::eRotateCameraY(float theta) {
+	cameraTheta += theta;
+
+	float cosT = cosf((cameraTheta * PI) / 180.0f);
+	float sinT = sinf((cameraTheta * PI) / 180.0f);
+
+	float x_p = sinT;
+	float z_p = cosT;
+
+	this->cameraRotationMatrix = { x_p, z_p };
+}
+
 void Engine::sDrawLine(float x1, float y1, float x2, float y2) {
 
 	int flag = SDL_RenderDrawLineF(renderer, x1, y1, x2, y2);
@@ -288,18 +325,18 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c, float p
 	// Sutherman-Hodgman Algorithm...
 	// 
 	// I'm sure there is a better way to do
-	// this but were gonna roll for now.
+	// this but were gonna roll for now.)
 
 	auto isOffScreen = [properties = this->properties](const auto& px, const int bufferSize = 0) {
 		return ((px.x > properties->screenWidth + bufferSize)    ||
-		       (px.x < -bufferSize)				 ||
-			(px.y > properties->screenHeight + bufferSize)   ||
+		       (px.x < -bufferSize)								 ||
+			(px.y > properties->screenHeight + bufferSize)		 ||
 			 (px.y < -bufferSize));
 	};
 
-	if (isOffScreen(p1, 10) &&
-		isOffScreen(p2, 10) &&
-		isOffScreen(p3, 10)) return;
+	if (isOffScreen(p1, 0) &&
+		isOffScreen(p2, 0) &&
+		isOffScreen(p3, 0)) return;
 
 	/*
 	if (p1.y > properties->screenHeight + 10) p1.y = properties->screenHeight + 10;
@@ -346,9 +383,6 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c, float p
 }
 
 void Engine::sRenderTriangle(float3 v1, float3 v2, float3 v3, SDL_Color c) {
-	if (eGetCenterOfTri(v1, v2, v3).z - cameraPosition.z <= 0.0f) {
-		return;
-	}
 
 	float2 p1 = sProjectPoint(v1);
 	float2 p2 = sProjectPoint(v2);
@@ -581,7 +615,7 @@ float3 Engine::eFindMeanVertex(std::vector<float3> *vertices) {
 float Engine::eGetDistance(float3 a, float3 b) {
 	return (float)sqrt(
 			(float)(b.x-a.x)*(float)(b.x-a.x)     +
-			(float)(b.y-a.y)*(float)(b.y-a.y) +
+			(float)(b.y-a.y)*(float)(b.y-a.y)	  +
 			(float)(b.z-a.z)*(float)(b.z-a.z));
 }
 
