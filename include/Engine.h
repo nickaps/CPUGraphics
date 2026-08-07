@@ -28,6 +28,9 @@
 #include <filesystem>
 #include <vector>
 #include <cmath>
+#include <numeric>
+
+using std::iota;
 
 // Structs
 struct GAME_PROPERTIES {
@@ -82,9 +85,10 @@ public:
 	void sDrawWireTriangle(float2 p1, float2 p2, float2 p3);
 	void sRenderWireTriangle(float3 v1, float3 v2, float3 v3);
 	void sRenderWireframeMesh(mesh m);
-	void sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c);
+	void sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c, float p1bright, float p2bright, float p3bright);
 	void sRenderTriangle(float3 v1, float3 v2, float3 v3, SDL_Color c);
 	void sRenderMesh(mesh m, SDL_Color c);
+	void sRenderMeshes(std::vector<mesh*> meshes, std::vector<SDL_Color> colors);
 	float2 sProjectPoint(float3 pos);
 
 	// Engine Methods
@@ -94,6 +98,10 @@ public:
 	int eRunGame();
 	int ePreload();
 	int eGameStep();
+	float eGetDistance(float3 a, float3 b);
+	float3 eGetCenterOfTri(float3 v1, float3 v2, float3 v3);
+	float3 eFindMeanVertex(std::vector<float3> *vertices);
+	float eFindBrightnessFromFog(float3 point);
 
 	mesh* eParseMesh(std::string filePath);
 	void eTranslateMesh(mesh* m, float3 dsplcmnt);
@@ -106,6 +114,12 @@ public:
 
 	std::vector<std::string> pathsToMeshes;
 	std::vector<mesh*> loadedMeshes;
+	std::vector<mesh*> meshesToRender;
+	std::vector<SDL_Color> colorsToRender;
+
+	int fogStart = 9.0f;
+	int fogEnd = 40.0f;
+	SDL_Color fogColor = SDL_Color{10, 10, 10};
 
 	float time = 0.0f;
 

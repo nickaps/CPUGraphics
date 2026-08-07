@@ -145,10 +145,10 @@ int Engine::eRunGame() {
 }
 
 int Engine::eOnGameStart() {		// Implementation determined by user
-	this->eTranslateMesh(mPyramid, float3{ 0, -2.0f, 10.0f });
-	this->eTranslateMesh(loadedMeshes[0], float3{ 5.0, -2.0f, 10.0f});
+	this->eTranslateMesh(mPyramid, float3{ 0, -2.0f, 15.0f });
+	this->eTranslateMesh(loadedMeshes[0], float3{ 3.0, -2.0f, 20.0f});
 	this->eTranslateMesh(loadedMeshes[1], float3{ 3.0, -2.0f, 10.0f });
-	this->eTranslateMesh(loadedMeshes[2], float3{ -3.0, -2.0f, 10.0f });
+	this->eTranslateMesh(loadedMeshes[2], float3{ -3.0, -0.8f, 6.0f });
 	this->eTranslateMesh(loadedMeshes[3], float3{ -5.0, -2.0f, 10.0f });
 	return 0;
 }
@@ -158,17 +158,9 @@ int Engine::eOnUpdate() {			// Implementation determined by user
 
 	// Renders
 	this->sRenderMesh(*mPyramid, red);
-	this->sRenderMesh(*loadedMeshes[0], green);
-	this->sRenderMesh(*loadedMeshes[1], blue);
-	this->sRenderMesh(*loadedMeshes[2], red);
-	this->sRenderMesh(*loadedMeshes[3], foreground);
+	this->sRenderMeshes(loadedMeshes, this->colorsToRender);
 
 	// Translates
-	this->eTranslateMesh(mPyramid, float3{ 0, (sinf(this->time) * 0.001f), 0});
-	this->eTranslateMesh(loadedMeshes[0], float3{ 0, (cosf(this->time) * 0.001f), 0 });
-	this->eTranslateMesh(loadedMeshes[1], float3{ 0, (sinf(this->time) * 0.001f), 0 });
-	this->eTranslateMesh(loadedMeshes[2], float3{ 0, (cosf(this->time) * 0.001f), 0 });
-	this->eTranslateMesh(loadedMeshes[3], float3{ 0, (sinf(this->time) * 0.001f), 0 });
 
 	return 0;
 }
@@ -260,49 +252,71 @@ void Engine::sDrawLine(float x1, float y1, float x2, float y2) {
 	return;
 }
 
-void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c) {
+float Engine::eFindBrightnessFromFog(float3 point) {
+	float dFromCam = eGetDistance(point, float3{0.0f, 0.0f, 0.0f});
+	float range = fogEnd - fogStart;
+	float brightness = 1.0f;
+	if (dFromCam >= fogStart && range > 0) {
+		brightness = std::max(1 - ((dFromCam - fogStart) / range), 0.0f);
+	}
+	return brightness;
+};
+
+void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c, float p1bright = 1.0f, float p2bright = 1.0f, float p3bright = 1.0f) {
 	// Sutherman-Hodgman Algorithm...
 	// 
 	// I'm sure there is a better way to do
 	// this but were gonna roll for now.
 
-	if ((p1.y > properties->screenHeight || p1.y < 0) || (p1.x > properties->screenWidth || p1.x < 0) &&
-		(p2.y > properties->screenHeight || p2.y < 0) || (p2.x > properties->screenWidth || p2.x < 0) &&
-		(p3.y > properties->screenHeight || p3.y < 0) || (p3.x > properties->screenWidth || p3.x < 0)) return;
+	auto isOffScreen = [properties = this->properties](const auto& px, const int bufferSize = 0) {
+		return ((px.x > properties->screenWidth + bufferSize)    ||
+		       (px.x < -bufferSize)				 ||
+			(px.y > properties->screenHeight + bufferSize)   ||
+			 (px.y < -bufferSize));
+	};
 
-	if (p1.y > properties->screenHeight) p1.y = properties->screenHeight + 1;
-	if (p2.y > properties->screenHeight) p2.y = properties->screenHeight + 1;
-	if (p3.y > properties->screenHeight) p3.y = properties->screenHeight + 1;
+	if (isOffScreen(p1, 10) &&
+		isOffScreen(p2, 10) &&
+		isOffScreen(p3, 10)) return;
 
-	if (p1.y < 0) p1.y = -1;
-	if (p2.y < 0) p2.y = -1;
-	if (p3.y < 0) p3.y = -1;
+	/*
+	if (p1.y > properties->screenHeight + 10) p1.y = properties->screenHeight + 10;
+	if (p2.y > properties->screenHeight + 10) p2.y = properties->screenHeight + 10;
+	if (p3.y > properties->screenHeight + 10) p3.y = properties->screenHeight + 10;
 
-	if (p1.x > properties->screenWidth) p1.x = properties->screenWidth + 1;
-	if (p2.x > properties->screenWidth) p2.x = properties->screenWidth + 1;
-	if (p3.x > properties->screenWidth) p3.x = properties->screenWidth + 1;
+	if (p1.y < -10) p1.y = -10;
+	if (p2.y < -10) p2.y = -10;
+	if (p3.y < -10) p3.y = -10;
 
-	if (p1.x < 0) p1.x = -1;
-	if (p2.x < 0) p2.x = -1;
-	if (p3.x < 0) p3.x = -1;
+	if (p1.x > properties->screenWidth + 10) p1.x = properties->screenWidth + 10;
+	if (p2.x > properties->screenWidth + 10) p2.x = properties->screenWidth + 10;
+	if (p3.x > properties->screenWidth + 10) p3.x = properties->screenWidth + 10;
+
+	if (p1.x < -10) p1.x = -10;
+	if (p2.x < -10) p2.x = -10;
+	if (p3.x < -10) p3.x = -10;
+	*/
 
 	SDL_Vertex vertices[3];
 
 	vertices[0].color = c;
-	vertices[0].color.r *= 0.5;
-	vertices[0].color.b *= 0.8;
-	vertices[0].color.g *= 0.5;
+	vertices[0].color.r *= p1bright;
+	vertices[0].color.b *= p1bright;
+	vertices[0].color.g *= p1bright;
 	vertices[0].position = { p1.x, p1.y };
 	vertices[0].tex_coord = { 0.0f, 0.0f };
 
 	vertices[1].color = c;
-	vertices[0].color.r *= 0.9;
-	vertices[0].color.b *= 0.8;
-	vertices[0].color.g *= 0.9;
+	vertices[1].color.r *= p2bright;
+	vertices[1].color.b *= p2bright;
+	vertices[1].color.g *= p2bright;
 	vertices[1].position = { p2.x, p2.y };
 	vertices[1].tex_coord = { 0.0f, 0.0f };
 
 	vertices[2].color = c;
+	vertices[2].color.r *= p3bright;
+	vertices[2].color.g *= p3bright;
+	vertices[2].color.b *= p3bright;
 	vertices[2].position = { p3.x, p3.y };
 	vertices[2].tex_coord = { 0.0f, 0.0f };
 
@@ -314,7 +328,7 @@ void Engine::sRenderTriangle(float3 v1, float3 v2, float3 v3, SDL_Color c) {
 	float2 p2 = sProjectPoint(v2);
 	float2 p3 = sProjectPoint(v3);
 
-	this->sDrawTriangle(p1, p2, p3, c);
+	this->sDrawTriangle(p1, p2, p3, c, this->eFindBrightnessFromFog(v1), this->eFindBrightnessFromFog(v2), this->eFindBrightnessFromFog(v3));
 }
 
 void Engine::sRenderMesh(mesh m, SDL_Color c) {
@@ -327,8 +341,9 @@ void Engine::sRenderMesh(mesh m, SDL_Color c) {
 	float2 p1; float2 p2; float2 p3;
 
 	std::vector<triangle> tris_cpy = triangles;
-	std::sort(tris_cpy.begin(), tris_cpy.end(), [m](const auto& a, const auto& b) {
-		return ((m.verts[a.v1].z + m.verts[a.v2].z + m.verts[a.v3].z) / 3) > ((m.verts[b.v1].z + m.verts[b.v2].z + m.verts[b.v3].z) / 3);
+	std::sort(tris_cpy.begin(), tris_cpy.end(), [this, m](const auto& a, const auto& b) {
+		return (eGetDistance(eGetCenterOfTri(m.verts[a.v1], m.verts[a.v2], m.verts[a.v3]), {0.0f, 0.0f, 0.0f}) >
+			eGetDistance(eGetCenterOfTri(m.verts[b.v1], m.verts[b.v2], m.verts[b.v3]), {0.0f, 0.0f, 0.0f}));
 		});
 
 	for (int i = 0; i < count; i++) {
@@ -489,4 +504,66 @@ mesh* Engine::eParseMesh(std::string filePath) {
 
 	std::cout << ": Successfully loaded mesh " << filePath << " [*]\n";
 	return m;
+}
+
+void Engine::sRenderMeshes(std::vector<mesh*> meshes, std::vector<SDL_Color> colors) {
+	if (meshes.size() == 0 || meshes[0] == nullptr) return;
+
+	std::vector<int> indices(meshes.size());
+	iota(indices.begin(), indices.end(), 0);
+	
+	std::vector<std::pair<int, mesh*>> pairs(meshes.size());
+	for (int i = 0; i < meshes.size(); i++) {
+		pairs[i] = {indices[i], meshes[i]};
+	}
+
+	std::sort(pairs.begin(), pairs.end(), [this](const auto& a, const auto& b) {
+		if (a.second == nullptr || b.second == nullptr) return false;
+
+		if (a.second->verts.size() == 0 || b.second->verts.size() == 0) return false;
+
+		float3 mean_a = eFindMeanVertex(&a.second->verts);
+		float3 mean_b = eFindMeanVertex(&b.second->verts);
+
+		return (float)eGetDistance(mean_a, float3{0.0f, 0.0f, 0.0f}) > (float)eGetDistance(mean_b, float3{0.0f, 0.0f, 0.0f});
+		
+	});
+
+
+	for (int i = 0; i < meshes.size(); i++) {
+		SDL_Color c = {255, 0, 255};
+		if (pairs[i].first < colors.size()) c = colors[pairs[i].first];
+		this->sRenderMesh(*meshes[pairs[i].first], c);
+	}
+}
+
+float3 Engine::eFindMeanVertex(std::vector<float3> *vertices) {
+	if (vertices->size() == 0) return {0.0, 0.0, 0.0};
+	int sz = vertices->size();
+	float mean_x = 0.0f; float mean_y = 0.0f; float mean_z = 0.0f;
+	for (int i = 0; i < sz; i++) {
+		mean_x += vertices->at(i).x;
+		mean_y += vertices->at(i).y;
+		mean_z += vertices->at(i).z;
+	}
+	mean_x = mean_x / sz;
+	mean_y = mean_y / sz;
+	mean_z = mean_z / sz;
+	return {mean_x, mean_y, mean_z};
+}
+
+float Engine::eGetDistance(float3 a, float3 b) {
+	return (float)sqrt(
+			(float)(b.x-a.x)*(float)(b.x-a.x)     +
+			(float)(b.y-a.y)*(float)(b.y-a.y) +
+			(float)(b.z-a.z)*(float)(b.z-a.z));
+}
+
+float3 Engine::eGetCenterOfTri(float3 v1, float3 v2, float3 v3) {
+	float3 center = {
+		(v1.x + v2.x + v3.x) / 3,
+		(v1.y + v2.y + v3.y) / 3,
+		(v1.z + v2.z + v3.z) / 3
+	};
+	return center;
 }
