@@ -102,6 +102,7 @@ public:
 	float3 eGetCenterOfTri(float3 v1, float3 v2, float3 v3);
 	float3 eFindMeanVertex(std::vector<float3> *vertices);
 	float eFindBrightnessFromFog(float3 point);
+	void eMoveCamera(float3 dsplcmnt);
 
 	mesh* eParseMesh(std::string filePath);
 	void eTranslateMesh(mesh* m, float3 dsplcmnt);
@@ -117,8 +118,10 @@ public:
 	std::vector<mesh*> meshesToRender;
 	std::vector<SDL_Color> colorsToRender;
 
-	int fogStart = 9.0f;
-	int fogEnd = 40.0f;
+	float3 cameraPosition = { 0.0f, 0.0f, 0.0f };
+
+	int fogStart = 2.0f;
+	int fogEnd = 50.0f;
 	SDL_Color fogColor = SDL_Color{10, 10, 10};
 
 	float time = 0.0f;

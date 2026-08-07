@@ -135,6 +135,22 @@ int Engine::eRunGame() {
 	while (!quit) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) quit = true;
+			if (e.type == SDL_KEYDOWN) {
+				switch (e.key.keysym.sym) {
+				case SDLK_w:
+					eMoveCamera(float3{ 0.0f, 0.0f, 0.5f });
+					break;
+				case SDLK_s:
+					eMoveCamera(float3{ 0.0f, 0.0f, -0.5f });
+					break;
+				case SDLK_a:
+					eMoveCamera(float3{ -0.5f, 0.0f, 0.0f });
+					break;
+				case SDLK_d:
+					eMoveCamera(float3{ 0.5f, 0.0f, 0.0f });
+					break;
+				}
+			}
 		}
 		eGameStep();
 	}
@@ -197,11 +213,11 @@ int Engine::eGameStep() {
 
 float2 Engine::eProject(float x, float y, float z) {
 
-	float zpm = z;
+	float zpm = z - cameraPosition.z;
 	if (z <= 0.001f) zpm = 0.001f;
 	return float2{
-		x / zpm,
-		y / zpm
+		(x - cameraPosition.x) / zpm,
+		(y - cameraPosition.y)  / zpm
 	};
 }
 
@@ -246,6 +262,12 @@ void Engine::sRenderVertex(float3 pos) {
 	this->sDrawPoint(sPos);
 }
 
+void Engine::eMoveCamera(float3 dsplcmnt) {
+	this->cameraPosition.x += dsplcmnt.x;
+	this->cameraPosition.y += dsplcmnt.y;
+	this->cameraPosition.z += dsplcmnt.z;
+}
+
 void Engine::sDrawLine(float x1, float y1, float x2, float y2) {
 
 	int flag = SDL_RenderDrawLineF(renderer, x1, y1, x2, y2);
@@ -253,7 +275,7 @@ void Engine::sDrawLine(float x1, float y1, float x2, float y2) {
 }
 
 float Engine::eFindBrightnessFromFog(float3 point) {
-	float dFromCam = eGetDistance(point, float3{0.0f, 0.0f, 0.0f});
+	float dFromCam = eGetDistance(point, cameraPosition);
 	float range = fogEnd - fogStart;
 	float brightness = 1.0f;
 	if (dFromCam >= fogStart && range > 0) {
@@ -324,6 +346,10 @@ void Engine::sDrawTriangle(float2 p1, float2 p2, float2 p3, SDL_Color c, float p
 }
 
 void Engine::sRenderTriangle(float3 v1, float3 v2, float3 v3, SDL_Color c) {
+	if (eGetCenterOfTri(v1, v2, v3).z - cameraPosition.z <= 0.0f) {
+		return;
+	}
+
 	float2 p1 = sProjectPoint(v1);
 	float2 p2 = sProjectPoint(v2);
 	float2 p3 = sProjectPoint(v3);
@@ -342,8 +368,8 @@ void Engine::sRenderMesh(mesh m, SDL_Color c) {
 
 	std::vector<triangle> tris_cpy = triangles;
 	std::sort(tris_cpy.begin(), tris_cpy.end(), [this, m](const auto& a, const auto& b) {
-		return (eGetDistance(eGetCenterOfTri(m.verts[a.v1], m.verts[a.v2], m.verts[a.v3]), {0.0f, 0.0f, 0.0f}) >
-			eGetDistance(eGetCenterOfTri(m.verts[b.v1], m.verts[b.v2], m.verts[b.v3]), {0.0f, 0.0f, 0.0f}));
+		return (eGetDistance(eGetCenterOfTri(m.verts[a.v1], m.verts[a.v2], m.verts[a.v3]), cameraPosition) >
+			eGetDistance(eGetCenterOfTri(m.verts[b.v1], m.verts[b.v2], m.verts[b.v3]), cameraPosition));
 		});
 
 	for (int i = 0; i < count; i++) {
@@ -525,7 +551,7 @@ void Engine::sRenderMeshes(std::vector<mesh*> meshes, std::vector<SDL_Color> col
 		float3 mean_a = eFindMeanVertex(&a.second->verts);
 		float3 mean_b = eFindMeanVertex(&b.second->verts);
 
-		return (float)eGetDistance(mean_a, float3{0.0f, 0.0f, 0.0f}) > (float)eGetDistance(mean_b, float3{0.0f, 0.0f, 0.0f});
+		return (float)eGetDistance(mean_a, cameraPosition) > (float)eGetDistance(mean_b, cameraPosition);
 		
 	});
 
