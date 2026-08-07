@@ -26,7 +26,6 @@
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
     <None Include="README.md" />
-    <None Include="resources\test.mtl" />
     <None Include="SDL2.dll" />
     <None Include="bin\CPUGraphicsEngine.exe" />
     <None Include="bin\SDL2.dll" />
@@ -278,6 +277,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Object Include="resources\cube.obj" />
+    <Object Include="resources\house.obj" />
+    <Object Include="resources\monkey.obj" />
     <Object Include="resources\test.obj" />
   </ItemGroup>
   <ItemGroup>

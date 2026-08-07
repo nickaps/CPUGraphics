@@ -142,9 +142,6 @@
     <None Include="bin\SDL2.dll" />
     <None Include="build.bat" />
     <None Include="README.md" />
-    <None Include="resources\test.mtl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </None>
     <None Include="SDL2.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -233,9 +230,10 @@
     <ClInclude Include="include\Engine.h" />
   </ItemGroup>
   <ItemGroup>
-    <Object Include="resources\test.obj">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </Object>
+    <Object Include="resources\cube.obj" />
+    <Object Include="resources\house.obj" />
+    <Object Include="resources\monkey.obj" />
+    <Object Include="resources\test.obj" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
